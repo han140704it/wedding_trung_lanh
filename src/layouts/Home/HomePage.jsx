@@ -44,7 +44,7 @@ const HomePage = () => {
   return (
     <div className="wedding-card-container">
       <audio ref={audioRef} loop>
-        <source src="/src/assets/music/wedding-song.mp3" type="audio/mpeg" />
+        <source src="/assets/music/wedding-song.mp3" type="audio/mpeg" />
         Trình duyệt không hỗ trợ audio.
       </audio>
 
