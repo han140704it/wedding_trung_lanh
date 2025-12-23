@@ -1,184 +1,259 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './HomePage.css';
 import { WEDDING_DATA } from '../../utils/mock_data';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+
+// --- HIỆU ỨNG TRÁI TIM RƠI ---
+const FloatingElements = () => {
+  const elements = Array.from({ length: 15 });
+  return (
+    <div className="floating-container">
+      {elements.map((_, i) => (
+        <motion.div
+          key={i}
+          className="heart-particle"
+          initial={{ 
+            top: -20, 
+            left: Math.random() * 100 + "%", 
+            opacity: 0,
+            scale: Math.random() * 0.5 + 0.5 
+          }}
+          animate={{ 
+            top: "110vh", 
+            opacity: [0, 1, 1, 0],
+            rotate: 360,
+            x: [0, Math.random() * 50 - 25, 0]
+          }}
+          transition={{ 
+            duration: Math.random() * 5 + 5, 
+            repeat: Infinity, 
+            ease: "linear",
+            delay: Math.random() * 10
+          }}
+        >
+          ❤
+        </motion.div>
+      ))}
+    </div>
+  );
+};
 
 const HomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showBank, setShowBank] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false); 
-  
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedImg, setSelectedImg] = useState(null);
   const contentRef = useRef(null);
-  const audioRef = useRef(null); 
+  const audioRef = useRef(null);
+
+  const weddingPhotos = [
+    WEDDING_DATA.assets.couplePhoto1,
+    WEDDING_DATA.assets.couplePhoto2,
+    WEDDING_DATA.assets.couplePhoto3,
+    WEDDING_DATA.assets.couplePhoto4,
+  ];
+
+  // Variants cho hiệu ứng xuất hiện khi scroll
+  const fadeInUp = {
+    initial: { opacity: 0, y: 40 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.2 },
+    transition: { duration: 0.8, ease: "easeOut" }
+  };
 
   const handleEnvelopeClick = () => {
     setIsOpen(true);
     if (audioRef.current) {
-      audioRef.current.play().catch(error => {
-        console.log("Trình duyệt chặn tự động phát nhạc:", error);
-      });
+      audioRef.current.play().catch(err => console.log("Blocked:", err));
       setIsPlaying(true);
     }
   };
-  const toggleMusic = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };    
 
-  const toggleBankInfo = () => {
-    setShowBank(!showBank);
+  const toggleMusic = () => {
+    if (isPlaying) audioRef.current.pause();
+    else audioRef.current.play();
+    setIsPlaying(!isPlaying);
   };
+
   useEffect(() => {
     if (isOpen && contentRef.current) {
       setTimeout(() => {
-        contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        contentRef.current.scrollIntoView({ behavior: 'smooth' });
       }, 800);
     }
   }, [isOpen]);
 
-  const calendarDays = Array.from({length: 31}, (_, i) => i + 1);
-
   return (
     <div className="wedding-card-container">
+      <FloatingElements /> {/* Hiệu ứng hạt rơi nền */}
+
       <audio ref={audioRef} loop>
         <source src="/assets/music/wedding-song.mp3" type="audio/mpeg" />
-        Trình duyệt không hỗ trợ audio.
       </audio>
 
-      <div 
+      {/* Music Toggle - Thêm hiệu ứng nhịp đập khi đang phát */}
+      <motion.div 
         className={`music-toggle-btn ${isPlaying ? 'spinning' : ''}`} 
         onClick={toggleMusic}
+        whileTap={{ scale: 0.9 }}
       >
         <span className="music-icon">{isPlaying ? '♫' : '🔇'}</span>
-      </div>
+      </motion.div>
 
       <div className={`invitation-wrapper ${isOpen ? 'is-open' : ''}`}>
-
-        <div className="header-caption">YOU ARE • THE LOVE OF • MY LIFE</div>
+        <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ duration: 1.5 }}
+            className="header-caption"
+        >
+            YOU ARE • THE LOVE OF • MY LIFE
+        </motion.div>
+        
         <h1 className="main-title">Wedding Invitation</h1>
         
-        <p className="instruction" style={{ opacity: isOpen ? 0 : 1 }}>
+        <motion.p 
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="instruction" 
+          style={{ opacity: isOpen ? 0 : 1 }}
+        >
           Chạm để mở thiệp
-        </p>
+        </motion.p>
         
-        {/* KHỐI BAO THƯ */}
         <div className={`envelope-container ${isOpen ? 'is-open' : ''}`} onClick={handleEnvelopeClick}>
           <div className="envelope-flap"></div>
           <div className="envelope-base"></div>
-          <div className="wax-seal-img"><span>❤</span></div>
-          <img src={WEDDING_DATA.assets.couplePhoto} alt="Couple Pop-up" className="pop-up-photo" />
+         <div className="wax-seal-img"><span>❤</span></div>
+          <img src={WEDDING_DATA.assets.couplePhoto} alt="Couple" className="pop-up-photo" />
         </div>
 
-        {/* NỘI DUNG CHI TIẾT HIỆN RA SAU KHI MỞ */}
         <div className="expanded-content" ref={contentRef}>
-            
-            {/* 1. THÔNG TIN LỜI MỜI */}
-            <div className="invitation-body">
+            {/* 1. Thông tin mời - Hiệu ứng trôi lên */}
+            <motion.div {...fadeInUp} className="invitation-body">
                 <div className="invite-text-shadow">Trân trọng kính mời</div>
                 <h2 className="guest-name-cursive">{WEDDING_DATA.guestName}</h2>
-                <div className="event-description">ĐẾN DỰ BUỔI TIỆC CHUNG VUI <br/> CÙNG GIA ĐÌNH CHÚNG TÔI VÀO LÚC</div>
+                <div className="event-description">ĐẾN DỰ BUỔI TIỆC CHUNG VUI</div>
+                
                 <div className="date-large">
                     <span>{WEDDING_DATA.time}</span>|<span>{WEDDING_DATA.day}</span>|<span>{WEDDING_DATA.date}</span>
                 </div>
                 <div className="lunar-date">(Nhằm ngày {WEDDING_DATA.lunarDate})</div>
                 
                 <div className="location-divider"></div>
-                <div className="location-title">HÔN LỄ ĐƯỢC CỬ HÀNH TẠI</div>
                 <h3 className="location-name">{WEDDING_DATA.location.name}</h3>
                 <p className="location-address">{WEDDING_DATA.location.address}</p>
-                <button className="map-button" onClick={() => window.open(WEDDING_DATA.location.mapLink)}>
+                
+                <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="map-button" 
+                    onClick={() => window.open(WEDDING_DATA.location.mapLink)}
+                >
                     Xem đường đi
-                </button>
-            </div>
+                </motion.button>
+            </motion.div>
 
-            {/* 2. PHẦN LỊCH THÁNG 1/2026 */}
-            <div className="calendar-section">
+            {/* 2. Lịch - Hiệu ứng Stagger (xuất hiện từng chút một) */}
+            <motion.div {...fadeInUp} className="calendar-section">
                 <div className="date-large" style={{fontSize: '18px', marginBottom: '10px'}}>
                     THÁNG 01 | 2026
                 </div>
                 <div className="calendar-grid">
                     {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => (
-                        <div key={day} className="calendar-day" style={{fontWeight: 'bold', fontSize: '12px'}}>{day}</div>
+                        <div key={day} className="calendar-day" style={{fontWeight: 'bold'}}>{day}</div>
                     ))}
-                    {calendarDays.map(day => (
-                        <div key={day} className={`calendar-day ${day === WEDDING_DATA.eventDate ? 'marked' : ''}`}>
+                    {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                        <motion.div 
+                            key={day} 
+                            whileHover={{ scale: 1.2, color: '#d4a373' }}
+                            className={`calendar-day ${day === WEDDING_DATA.eventDate ? 'marked' : ''}`}
+                        >
                             {day}
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
-                 <div className="lunar-date" style={{marginTop: '15px'}}>THỨ BẢY | {WEDDING_DATA.date}</div>
-            </div>
+            </motion.div>
 
             {/* 3. PHẦN LOVE STORY VỚI ẢNH XẾP CHỒNG */}
-            <div className="love-story-section">
-              <h2 className="save-the-date-center">Save the Date</h2>
-                <div className="top-quote-container">
-                    <p>{WEDDING_DATA.loveStory.topQuote}</p>
-                </div>
+                        <div className="love-story-section">
+                          <h2 className="save-the-date-center">Save the Date</h2>
+                            <div className="bottom-content">
+                                <p>{WEDDING_DATA.loveStory.topQuote}</p>
+                            </div>
+            
+                            <div className="layered-photo-container">
+                                <div className="vertical-text left">MY LOVE</div>
+                                <div className="vertical-text right">FOREVER</div>
+                                <img 
+                                    src={WEDDING_DATA.loveStory.mainPhoto} 
+                                    alt="Background Love" 
+                                    className="bg-layered-photo"
+                                />
+                                <img 
+                                    src={WEDDING_DATA.loveStory.cutoutPhoto} 
+                                    alt="Sticker Couple" 
+                                    className="sticker-photo"
+                                />
+                            </div>
+                            <div className="love-you-right">I Love You</div>
+            
+                            <div className="bottom-content">
+                                {WEDDING_DATA.loveStory.bottomQuotes.map((quote, index) => (
+                                    <p key={index} style={{margin: '5px 0'}}>{quote}</p>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="floating-gift-btn" onClick={() => window.open(WEDDING_DATA.location.mapLink)}>
+                          Xem đường đi
+                        </div>
 
-                <div className="layered-photo-container">
-                    <div className="vertical-text left">MY LOVE</div>
-                    <div className="vertical-text right">FOREVER</div>
-                    <img 
-                        src={WEDDING_DATA.loveStory.mainPhoto} 
-                        alt="Background Love" 
-                        className="bg-layered-photo"
-                    />
-                    <img 
-                        src={WEDDING_DATA.loveStory.cutoutPhoto} 
-                        alt="Sticker Couple" 
-                        className="sticker-photo"
-                    />
-                </div>
-                <div className="love-you-right">I Love You</div>
-
-                <div className="bottom-quote-container">
-                    {WEDDING_DATA.loveStory.bottomQuotes.map((quote, index) => (
-                        <p key={index} style={{margin: '5px 0'}}>{quote}</p>
-                    ))}
-                </div>
-            </div>
-
-            {/* 4. HỘP QUÀ CƯỚI */}
-            <div className="gift-section">
-                <div className="gift-icon">♥</div>
-                <h3 className="gift-title">Hộp quà cưới</h3>
-                <img 
-                    src={WEDDING_DATA.assets.giftIcon} 
-                    alt="Gift Box" 
-                    className="gift-box-img" 
-                    onClick={toggleBankInfo}
-                    style={{ cursor: 'pointer' }}
-                />
-
-                {showBank && (
-                    <div className="bank-details-card">
-                        <p><strong>{WEDDING_DATA.bankInfo.bankName}</strong></p>
-                        <p>Số tài khoản: <span>{WEDDING_DATA.bankInfo.accountNumber}</span></p>
-                        <p>Chủ tài khoản: <span>{WEDDING_DATA.bankInfo.accountName}</span></p>
-                        <img 
-                            src={WEDDING_DATA.bankInfo.qrCode} 
-                            alt="QR Code" 
-                            className="qr-code-display" 
-                        />
-                        <button className="close-bank-btn" onClick={toggleBankInfo}>Đóng</button>
-                    </div>
-                )}
-            </div>
-
-            {/* 5. ẢNH LỚN CUỐI THIỆP */}
-            <div className="couple-photo-section">
-                <div className="vertical-text left">MY LOVE</div>
-                <div className="vertical-text right">FOREVER</div>
-                <img src={WEDDING_DATA.assets.couplePhoto} alt="Couple Large" className="couple-photo-large" />
-            </div>
+            {/* 3. Ảnh Grid - Hiệu ứng Zoom khi xem */}
+            <section className="section-grid">
+              <div className="photo-grid">
+                {weddingPhotos.map((photo, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="grid-item"
+                    layoutId={`photo-${index}`} 
+                    onClick={() => setSelectedImg(photo)} 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ scale: 1.03, cursor: 'zoom-in' }}
+                  >
+                    <img src={photo} alt={`grid-${index}`} loading="lazy" />
+                  </motion.div>
+                ))}
+              </div>
+            </section>
             <div className="footer-text">"Sự hiện diện của quý khách là niềm vinh dự lớn nhất đối với chúng tôi."</div>
-        </div> 
+        </div>
+        </div>
+        <AnimatePresence>
+        {selectedImg && (
+          <motion.div 
+            className="lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImg(null)} // Nhấn ra ngoài để tắt
+          >
+            <motion.div 
+              className="lightbox-content"
+              initial={{ scale: 0.5, rotate: -5 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click lan ra ngoài làm tắt ảnh
+            >
+              <img src={selectedImg} alt="Zoomed" />
+              <button className="close-lightbox" onClick={() => setSelectedImg(null)}>✕</button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence> 
       </div>
-    </div>
   );
 };
 
