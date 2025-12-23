@@ -31,7 +31,7 @@ const FloatingElements = () => {
             delay: Math.random() * 10
           }}
         >
-          ❤
+          {"❤\uFE0E"}
         </motion.div>
       ))}
     </div>
@@ -123,7 +123,7 @@ const HomePage = () => {
         <div className={`envelope-container ${isOpen ? 'is-open' : ''}`} onClick={handleEnvelopeClick}>
           <div className="envelope-flap"></div>
           <div className="envelope-base"></div>
-         <div className="wax-seal-img"><span>❤</span></div>
+         <div className="wax-seal-img"><span>{"❤\uFE0E"}</span></div>
           <img src={WEDDING_DATA.assets.couplePhoto} alt="Couple" className="pop-up-photo" />
         </div>
 
