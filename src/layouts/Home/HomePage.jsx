@@ -158,6 +158,7 @@ const HomePage = () => {
             </motion.div>
 
             {/* 2. Lịch - Hiệu ứng Stagger (xuất hiện từng chút một) */}
+            {/* 2. Lịch - Đã sửa lỗi lệch ngày */}
             <motion.div {...fadeInUp} className="calendar-section">
                 <div className="date-large" style={{fontSize: '18px', marginBottom: '10px'}}>
                     THÁNG 01 | 2026
@@ -166,7 +167,15 @@ const HomePage = () => {
                     {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(day => (
                         <div key={day} className="calendar-day" style={{fontWeight: 'bold'}}>{day}</div>
                     ))}
-                    {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+
+                    {/* Thêm các ô trống để ngày 1 bắt đầu vào Thứ Năm (T5) */}
+                    {/* Vì T2, T3, T4 là 3 ô trống */}
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={`empty-${i}`} className="calendar-day empty"></div>
+                    ))}
+
+                    {/* Render các ngày trong tháng */}
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                         <motion.div 
                             key={day} 
                             whileHover={{ scale: 1.2, color: '#d4a373' }}
