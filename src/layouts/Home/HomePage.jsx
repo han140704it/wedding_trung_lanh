@@ -39,6 +39,51 @@ const FloatingElements = () => {
     </div>
   );
 };
+const cardVariants = {
+    offscreen: (direction) => ({
+      x: direction === 'left' ? -120 : 120,
+      y: 50,
+      opacity: 0,
+      rotate: direction === 'left' ? -15 : 15 
+    }),
+    onscreen: (direction) => ({
+      x: 0,
+      y: 0,
+      opacity: 1,
+      rotate: direction === 'left' ? -6 : 8, 
+      transition: {
+        type: "spring",
+        damping: 20, 
+        stiffness: 100,
+        duration: 0.8,
+        delay: direction === 'right' ? 0.2 : 0 
+      }
+    })
+  };
+
+  const flyInLeft = {
+    initial: { opacity: 0, x: -200 }, // Bắt đầu cách bên trái 200px, mờ
+    whileInView: { opacity: 1, x: 0 }, // Kết thúc tại vị trí gốc, rõ nét
+    viewport: { once: true, amount: 0.3 }, // Kích hoạt khi nhìn thấy 30%
+    transition: {
+      type: "spring", // Loại chuyển động lò xo tạo độ nảy
+      damping: 20, // Độ cản (càng cao càng ít nảy)
+      stiffness: 100, // Độ cứng (càng cao càng nhanh)
+      duration: 0.8
+    }
+  };
+  const flyInRight = {
+    initial: { opacity: 0, x: 200 }, // Bắt đầu cách bên phải 200px, mờ
+    whileInView: { opacity: 1, x: 0 },
+    viewport: { once: true, amount: 0.3 },
+    transition: {
+      type: "spring",
+      damping: 20,
+      stiffness: 100,
+      duration: 0.8,
+      delay: 0.2 // Chú rể bay vào chậm hơn cô dâu 0.2s cho tự nhiên
+    }
+  };
 
 const HomePage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,14 +91,31 @@ const HomePage = () => {
   const [selectedImg, setSelectedImg] = useState(null);
   const contentRef = useRef(null);
   const audioRef = useRef(null);
+  const [showAll, setShowAll] = useState(false);
+  
 
-  const weddingPhotos = [
+  
+  
+  // Giả sử bạn có mảng weddingPhotos từ mock_data
+  const allPhotos = [
     WEDDING_DATA.assets.couplePhoto1,
     WEDDING_DATA.assets.couplePhoto2,
     WEDDING_DATA.assets.couplePhoto3,
+    WEDDING_DATA.assets.couplePhoto11,
     WEDDING_DATA.assets.couplePhoto4,
+    WEDDING_DATA.assets.couplePhoto5,
+    WEDDING_DATA.assets.couplePhoto6, 
+    WEDDING_DATA.assets.couplePhoto7,
+    WEDDING_DATA.assets.couplePhoto8,
+    WEDDING_DATA.assets.couplePhoto9,
+    WEDDING_DATA.assets.couplePhoto10,
+    WEDDING_DATA.assets.couplePhoto,
+    
   ];
-
+  const displayPhotos = showAll ? allPhotos : allPhotos.slice(0, 4);
+  // Chia ảnh vào 2 cột: Cột 0 (Trái), Cột 1 (Phải)
+  const leftCol = displayPhotos.filter((_, i) => i % 2 === 0);
+  const rightCol = displayPhotos.filter((_, i) => i % 2 !== 0);
   // Variants cho hiệu ứng xuất hiện khi scroll
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
@@ -132,6 +194,35 @@ const HomePage = () => {
         </div>
 
         <div className="expanded-content" ref={contentRef}>
+            <div className="couple-introduction-container">
+                <motion.div 
+                    {...flyInLeft} 
+                    className="couple-block bride-block"
+                >
+                    <div className="couple-img-wrapper">
+                        <img src={WEDDING_DATA.couple.imagebride} alt="Cô Dâu" className="couple-img" />
+                    </div>
+                    <div className="couple-info">
+                        <div className="couple-role">Cô Dâu</div>
+                        <h3 className="couple-name-cursive">{WEDDING_DATA.couple.brideName}</h3>
+                    </div>
+                </motion.div>
+                <motion.div {...fadeInUp} className="couple-divider">✦</motion.div>
+                <motion.div 
+                    {...flyInRight} // <-- Thay fadeInUp bằng flyInRight
+                    className="couple-block groom-block"
+                >
+                  <div className="couple-info">
+                      <div className="couple-role">Chú Rể</div>
+                      <h3 className="couple-name-cursive">{WEDDING_DATA.couple.groomName}</h3>
+                  </div>
+                  <div className="couple-img-wrapper">
+                      <img src={WEDDING_DATA.couple.imagegroom} alt="Chú Rể" className="couple-img" />
+                  </div>
+              </motion.div>
+
+            </div>
+
             {/* 1. Thông tin mời - Hiệu ứng trôi lên */}
             <motion.div {...fadeInUp} className="invitation-body">
                 <div className="invite-text-shadow">Trân trọng kính mời</div>
@@ -219,27 +310,82 @@ const HomePage = () => {
                         <div className="floating-gift-btn" onClick={() => window.open(WEDDING_DATA.location.mapLink)}>
                           Xem đường đi
                         </div>
-
-            {/* 3. Ảnh Grid - Hiệu ứng Zoom khi xem */}
-            <section className="section-grid">
-              <div className="photo-grid">
-                {weddingPhotos.map((photo, index) => (
+            <section className="section-polaroid">
+              <div className="polaroid-container">
+                  {/* Ảnh Polaroid bên trái (Bay từ trái vào) */}
                   <motion.div 
-                    key={index} 
-                    className="grid-item"
-                    layoutId={`photo-${index}`} 
-                    onClick={() => setSelectedImg(photo)} 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.03, cursor: 'zoom-in' }}
+                    className="polaroid-frame frame-left"
+                    custom="left" // Quan trọng
+                    initial="offscreen"
+                    whileInView="onscreen" 
+                    viewport={{ once: true, amount: 0.3 }} 
+                    variants={cardVariants}
                   >
-                    <img src={photo} alt={`grid-${index}`} loading="lazy" />
+                      <div className="polaroid-img-wrapper">
+                        <img src={WEDDING_DATA.assets.couplePhoto3} alt="Groom Polaroid" />
+                      </div>
                   </motion.div>
-                ))}
+                  <motion.div 
+                    className="polaroid-frame frame-right"
+                    custom="right" // Quan trọng
+                    initial="offscreen"
+                    whileInView="onscreen"
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={cardVariants}
+                  >
+                      <div className="polaroid-img-wrapper">
+                        <img src={WEDDING_DATA.assets.couplePhoto11} alt="Bride Polaroid" />
+                      </div>
+                  </motion.div>
               </div>
             </section>
+
+            {/* 3. Ảnh Grid - Hiệu ứng Zoom khi xem */}
+            {/* --- PHẦN ALBUM ẢNH --- */}
+<section className="section-grid">
+  <div className="album-header">
+    <h2 className="save-the-date-left">Album</h2>
+    {allPhotos.length > 4 && (
+      <button 
+        className="album-toggle-btn" 
+        onClick={() => setShowAll(!showAll)}
+      >
+        {showAll ? "Thu gọn ▲" : `Xem thêm ▼`}
+      </button>
+    )}
+  </div>
+  
+  <div className="masonry-container">
+    <div className="masonry-column">
+      {leftCol.map((photo, index) => (
+        <motion.div 
+          key={`left-${index}`}
+          onClick={() => setSelectedImg(photo)}
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className={`masonry-item ${index % 2 === 0 ? 'short' : 'tall'}`}
+        >
+          <img src={photo} alt="wedding" />
+        </motion.div>
+      ))}
+    </div>
+    <div className="masonry-column">
+      {rightCol.map((photo, index) => (
+        <motion.div 
+          key={`right-${index}`}
+          onClick={() => setSelectedImg(photo)}
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className={`masonry-item ${index % 2 === 0 ? 'tall' : 'short'}`}
+        >
+          <img src={photo} alt="wedding" />
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
             <div className="footer-text">"Sự hiện diện của quý khách là niềm vinh dự lớn nhất đối với chúng tôi."</div>
         </div>
         </div>
@@ -250,7 +396,7 @@ const HomePage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedImg(null)} // Nhấn ra ngoài để tắt
+            onClick={() => setSelectedImg(null)} 
           >
             <motion.div 
               className="lightbox-content"
@@ -258,7 +404,7 @@ const HomePage = () => {
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click lan ra ngoài làm tắt ảnh
+              onClick={(e) => e.stopPropagation()} 
             >
               <img src={selectedImg} alt="Zoomed" />
               <button className="close-lightbox" onClick={() => setSelectedImg(null)}>✕</button>
