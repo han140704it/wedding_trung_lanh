@@ -1005,3 +1005,130 @@ html {
 .load-more-container {
     display: none;
 }
+
+/* --- ĐIỀU CHỈNH RESPONSIVE CHO DI ĐỘNG --- */
+
+@media (max-width: 480px) {
+  /* 1. Tổng thể container */
+  .wedding-card-container {
+    padding: 10px 5px; /* Giảm padding ngoài để tăng diện tích hiển thị */
+  }
+
+  .invitation-wrapper {
+    padding: 30px 15px; /* Giảm padding trong thiệp */
+  }
+
+  /* 2. Tiêu đề chính */
+  .main-title {
+    font-size: 2.4rem; /* Giảm size chữ để không bị tràn hàng */
+    margin-bottom: 60px;
+  }
+
+  /* 3. Bao thư (Envelope) */
+  .envelope-container {
+    width: 240px; /* Thu nhỏ bao thư để vừa màn hình nhỏ */
+    height: 155px;
+    margin: 30px auto;
+  }
+
+  /* 4. Phần Giới thiệu Cô Dâu - Chú Rể */
+  .couple-block {
+    gap: 12px; /* Giảm khoảng cách giữa ảnh và chữ */
+    margin-bottom: 25px;
+  }
+
+  .couple-img-wrapper {
+    width: 100px; /* Thu nhỏ ảnh đại diện */
+    height: 100px;
+    padding: 4px;
+  }
+
+  .couple-name-cursive {
+    font-size: 20px; /* Giảm size chữ tên */
+  }
+
+  .couple-info {
+    min-width: 120px; /* Đảm bảo text không bị co quá mức */
+  }
+
+  /* 5. Phần Lịch (Calendar) */
+  .calendar-grid {
+    gap: 5px; /* Thu hẹp khoảng cách các ngày */
+    max-width: 260px;
+  }
+
+  .calendar-day {
+    width: 25px;
+    height: 25px;
+    font-size: 14px;
+  }
+  
+  .calendar-day.marked::before {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* 6. Phần Love Story (Ảnh chồng lớp) */
+  .layered-photo-container {
+    height: 280px; /* Giảm chiều cao tổng thể */
+  }
+
+  .bg-layered-photo {
+    width: 85%; /* Tăng chiều rộng ảnh nền trên mobile */
+  }
+
+  .sticker-photo {
+    width: 60%; /* Cân đối lại ảnh sticker */
+    left: 2%;
+  }
+
+  .love-you-right {
+    font-size: 2.2rem;
+    margin-right: 15px;
+  }
+
+  /* 7. Phần Album Masonry - Quan trọng */
+  .album-header {
+    margin-top: 40px;
+  }
+
+  .album-toggle-btn {
+    margin-top: 0 !important; /* Sửa lỗi nút bị nhảy xuống 60px như trong code cũ */
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+
+  .save-the-date-left {
+    font-size: 2rem !important; /* Thu nhỏ chữ "Album" */
+  }
+
+  .masonry-container {
+    gap: 8px; /* Giảm khoảng cách giữa 2 cột ảnh */
+  }
+
+  .masonry-column {
+    gap: 8px;
+  }
+
+  .masonry-item.short {
+    height: 140px; /* Giảm chiều cao ảnh trên mobile */
+  }
+
+  .masonry-item.tall {
+    height: 220px;
+  }
+
+  /* 8. Polaroid Section */
+  .polaroid-container {
+    height: 320px;
+  }
+  
+  .polaroid-frame {
+    width: 50%;
+  }
+}
+
+/* --- FIX LỖI NÚT ALBUM TRONG CODE CŨ --- */
+.album-toggle-btn {
+    margin-top: 0; /* Đảm bảo nút luôn cùng hàng với tiêu đề */
+}
